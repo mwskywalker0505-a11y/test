@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { LocateFixed } from 'lucide-react';
 import { ASSETS } from '../constants';
 
