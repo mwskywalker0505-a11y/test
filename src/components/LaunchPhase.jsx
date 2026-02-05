@@ -81,11 +81,12 @@ const LaunchPhase = ({ onLaunch }) => {
                 {/* 4. Scanner Line */}
                 <div className="absolute top-1/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent animate-scan" style={{ animationDuration: '3s' }} />
 
-                {/* 5. Status Text */}
-                <div className="absolute top-8 left-8 font-mono text-[10px] text-cyan-700 space-y-1">
+                {/* 5. Status Text - Moved to Bottom Right to avoid overlap */}
+                <div className="absolute bottom-8 right-8 font-mono text-[10px] text-cyan-700/80 text-right space-y-1 z-30">
                     <p>SYS.VER.2.0.4</p>
                     <p>MEM: OK</p>
                     <p>NET: SECURE</p>
+                    <p>GYRO: {typeof DeviceOrientationEvent !== 'undefined' ? "DETECTED" : "N/A"}</p>
                 </div>
             </div>
 

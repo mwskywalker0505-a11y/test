@@ -84,16 +84,18 @@ const SearchPhase = ({ onFound }) => {
 
     return (
         <div className="w-full h-full relative overflow-hidden bg-black touch-none">
-            {/* World Container - Centered on Screen */}
+            {/* World Container - Centered */}
             <motion.div
-                className="absolute left-1/2 top-1/2"
+                className="absolute left-1/2 top-1/2" // Origin at screen center
                 style={{
-                    x: -position.x, // Move world opposite to camera movement
+                    x: -position.x,
                     y: -position.y
                 }}
-                transition={{ type: "spring", stiffness: 50, damping: 20 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ type: "spring", stiffness: 40, damping: 20 }}
             >
-                {/* Huge Background */}
+                {/* Huge Background Wrapper (4000x4000 centered on Origin) */}
                 <div
                     className="absolute"
                     style={{
@@ -106,22 +108,28 @@ const SearchPhase = ({ onFound }) => {
                 >
                     <img
                         src={ASSETS.SPACE_BG}
-                        className="w-full h-full object-cover opacity-60"
-                        style={{ filter: 'brightness(2.0) contrast(1.2)' }}
+                        className="w-full h-full object-cover opacity-80"
+                        style={{ filter: 'brightness(1.5) contrast(1.2)' }}
                         alt="bg"
                     />
-                    {/* Grid Overlay for depth */}
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:100px_100px] opacity-20" />
+
+                    {/* Grid for reference */}
+                    <div className="absolute inset-0 opacity-10" style={{
+                        backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+                        backgroundSize: '100px 100px'
+                    }} />
                 </div>
 
-                {/* The Moon */}
+                {/* The Moon - Positioned relative to Origin */}
                 <div
                     className="absolute rounded-full cursor-pointer"
                     onClick={handleMoonClick}
                     onTouchStart={handleMoonClick}
                     style={{
-                        left: 2000 + MOON_POS.x - MOON_SIZE / 2, // 2000 is center offset
-                        top: 2000 + MOON_POS.y - MOON_SIZE / 2,
+                        // Coordinates relative to Origin (0,0)
+                        // If Moon is at MOON_POS (e.g. 0, -400) relative to origin
+                        left: MOON_POS.x - MOON_SIZE / 2,
+                        top: MOON_POS.y - MOON_SIZE / 2,
                         width: MOON_SIZE,
                         height: MOON_SIZE,
                         zIndex: 20
@@ -132,17 +140,17 @@ const SearchPhase = ({ onFound }) => {
                         style={{
                             backgroundImage: `url(${ASSETS.MOON})`,
                             backgroundSize: 'cover',
-                            boxShadow: '0 0 80px 30px rgba(255, 255, 255, 0.9)'
+                            boxShadow: '0 0 100px 40px rgba(255, 255, 255, 0.8), inset 0 0 20px rgba(0,0,0,0.5)'
                         }}
                     />
-                    {/* Ping Animation */}
+                    {/* Ping */}
                     <div className="absolute inset-0 rounded-full border-4 border-white/50 animate-ping" />
                 </div>
             </motion.div>
 
 
-            {/* HUD Overlay */}
-            <div className="absolute inset-0 pointer-events-none z-50">
+            {/* HUD Overlay - FIXED ON SCREEN */}
+            <div className="fixed inset-0 pointer-events-none z-50 translate-z-0">
                 {/* Center Crosshair */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-60">
                     <div className="w-[60px] h-[60px] border border-cyan-400/50 rounded-full flex items-center justify-center">
@@ -151,41 +159,46 @@ const SearchPhase = ({ onFound }) => {
                     </div>
                 </div>
 
-                {/* Guide Arrow - ALWAYS SHOW if distance > 200 */}
+                {/* Guide Arrow Container - Centered */}
                 {distance > 250 && (
-                    <motion.div
-                        className="absolute top-1/2 left-1/2 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]"
-                        style={{
-                            marginLeft: '-24px', // Half width of icon
-                            marginTop: '-120px', // Radius of orbit
-                            transformOrigin: '50% 120px' // Center of rotation
-                        }}
-                        animate={{ rotate: angle }}
+                    <div
+                        className="absolute top-1/2 left-1/2 flex items-center justify-center"
+                        style={{ width: 0, height: 0, overflow: 'visible' }} // Ensure center origin
                     >
-                        <LocateFixed size={48} strokeWidth={2} />
-                        <div className="text-[10px] text-center font-bold mt-1 tracking-widest bg-black/50 backdrop-blur-sm">SIGNAL</div>
-                    </motion.div>
-                )}
-
-                {/* Target Locked Warning */}
-                {distance < 250 && !isFound && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mt-20">
-                        <p className="text-red-500 font-bold tracking-[0.2em] animate-pulse bg-black/50 px-2">TARGET DETECTED</p>
+                        <motion.div
+                            className="text-cyan-400 flex flex-col items-center justify-center origin-bottom"
+                            style={{
+                                height: '140px', // Orbit radius
+                                transformOrigin: 'bottom center', // Rotate from bottom (screen center)
+                                position: 'absolute',
+                                bottom: '0', // Anchor bottom to center
+                                display: 'flex',
+                                alignItems: 'flex-start' // Put icon at top of height
+                            }}
+                            animate={{ rotate: angle }}
+                        >
+                            <div className="flex flex-col items-center transform -translate-y-full">
+                                <LocateFixed size={48} strokeWidth={2} className="drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                                <div className="text-[10px] font-bold mt-1 bg-black/60 px-1 py-0.5 rounded text-cyan-200 tracking-widest uppercase whitespace-nowrap">
+                                    SIGNAL DETECTED
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 )}
             </div>
 
-            {/* Bottom Status */}
-            <div className="absolute bottom-12 w-full text-center pointer-events-none">
-                <p className="text-cyan-500/80 font-mono text-xs tracking-[0.3em]">
-                    SCANNING LOCAL SECTOR...
+            {/* Bottom Status - Fixed */}
+            <div className="absolute bottom-10 w-full text-center pointer-events-none z-50">
+                <p className="text-cyan-400/90 font-mono text-sm tracking-[0.3em] font-bold drop-shadow-md">
+                    SCANNING SECTOR
                 </p>
-                <p className="text-cyan-900/50 text-[10px] mt-1 font-mono">
-                    COORDS: {Math.floor(position.x)} : {Math.floor(position.y)}
-                </p>
+                <div className="text-cyan-900/60 text-[10px] mt-1 font-mono flex justify-center gap-4">
+                    <span>X: {Math.floor(position.x)}</span>
+                    <span>Y: {Math.floor(position.y)}</span>
+                    <span>DIST: {Math.floor(distance)}</span>
+                </div>
             </div>
         </div>
     );
 };
-
-export default SearchPhase;
