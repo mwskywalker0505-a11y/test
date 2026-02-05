@@ -5,7 +5,19 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      keyframes: {
+        scan: {
+          '0%': { top: '0%', opacity: 0 },
+          '10%': { opacity: 1 },
+          '90%': { opacity: 1 },
+          '100%': { top: '100%', opacity: 0 },
+        }
+      },
+      animation: {
+        scan: 'scan 3s linear infinite',
+      }
+    },
   },
   plugins: [],
 }
